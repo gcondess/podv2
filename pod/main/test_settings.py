@@ -66,7 +66,6 @@ ACTIVE_VIDEO_COMMENT = True
 USER_VIDEO_CATEGORY = True
 POD_ARCHIVE_AFFILIATION = ["faculty"]
 WARN_DEADLINES = [60, 30, 7]
-USE_BBB = True
 ORGANIZE_BY_THEME = True
 SHIBBOLETH_STAFF_ALLOWED_DOMAINS = ()
 SHIBBOLETH_ATTRIBUTE_MAP = {
@@ -83,6 +82,7 @@ EXISTING_BROADCASTER_IMPLEMENTATIONS = ["Wowza", "Test"]
 AFFILIATION_EVENT = ["employee"]
 
 USE_MEETING = True
+USE_SPEAKER = True
 
 
 def get_shared_secret():
@@ -109,8 +109,6 @@ XAPI_LRS_PWD = ""
 
 # Webinar options
 USE_MEETING_WEBINAR = True
-MEETING_WEBINAR_SIPMEDIAGW_URL = "https://127.0.0.1"
-MEETING_WEBINAR_SIPMEDIAGW_TOKEN = "token"
 MEETING_WEBINAR_AFFILIATION = ["faculty", "employee", "staff"]
 
 # Uniquement lors d'environnement conteneurisé

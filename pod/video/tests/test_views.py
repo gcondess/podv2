@@ -150,7 +150,13 @@ class ChannelTestView(TestCase):
         expected.pop("channel", None)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertCountEqual(expected, response.json())
+        # Ajax request for videos is now in HTML format, not JSON
+        self.assertEqual(response.context["videos"].paginator.count, 1)
+        self.assertEqual(response.context["theme"], None)
+        self.assertTrue(
+            b'id="videos_list" data-nextpage="false" data-countvideos="">'
+            in response.content
+        )
 
         # Test ajax request, get only themes from channel view
         self.client = Client()
@@ -162,6 +168,7 @@ class ChannelTestView(TestCase):
         expected.pop("next_videos", None)
         expected.pop("has_more_videos", None)
         expected.pop("count_videos", None)
+        expected.pop("videos", None)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertCountEqual(expected, response.json())
 
@@ -184,7 +191,13 @@ class ChannelTestView(TestCase):
         expected.pop("count_themes", None)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertCountEqual(expected, response.json())
+        # Ajax request for videos is now in HTML format, not JSON
+        self.assertEqual(response.context["videos"].paginator.count, 1)
+        self.assertEqual(response.context["theme"], None)
+        self.assertTrue(
+            b'id="videos_list" data-nextpage="false" data-countvideos="">'
+            in response.content
+        )
 
 
 class MyChannelsTestView(TestCase):
@@ -852,27 +865,28 @@ class VideoEditTestView(TestCase):
                 "main_lang": "fr",
                 "cursus": "0",
                 "type": 1,
+                "visibility": "public",
             },
             follow=True,
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        # print(response.context["form"].errors)
         self.assertTrue(b"The changes have been saved." in response.content)
 
         v = Video.objects.get(title="VideoTest1")
         self.assertEqual(v.description, "<p>bl</p>")
-        videofile = SimpleUploadedFile(
+        video_file = SimpleUploadedFile(
             "file.mp4", b"file_content", content_type="video/mp4"
         )
         url = reverse("video:video_edit", kwargs={"slug": v.slug})
         response = self.client.post(
             url,
             {
-                "video": videofile,
+                "video": video_file,
                 "title": "VideoTest1",
                 "main_lang": "fr",
                 "cursus": "0",
                 "type": 1,
+                "visibility": "public",
             },
             follow=True,
         )
@@ -882,19 +896,20 @@ class VideoEditTestView(TestCase):
         p = re.compile(r"^videos/([\d\w]+)/file([_\d\w]*).mp4$")
         self.assertRegex(v.video.name, p)
         # new one
-        videofile = SimpleUploadedFile(
+        video_file = SimpleUploadedFile(
             "file.mp4", b"file_content", content_type="video/mp4"
         )
         url = reverse("video:video_edit", kwargs={})
         self.client.post(
             url,
             {
-                "video": videofile,
+                "video": video_file,
                 "title": "VideoTest2",
                 "description": "<p>coucou</p>\r\n",
                 "main_lang": "fr",
                 "cursus": "0",
                 "type": 1,
+                "visibility": "public",
             },
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -916,6 +931,7 @@ class VideoEditTestView(TestCase):
                 "cursus": "0",
                 "type": 1,
                 "additional_owners": [self.user.pk],
+                "visibility": "public",
             },
             follow=True,
         )
@@ -924,19 +940,20 @@ class VideoEditTestView(TestCase):
 
         v = Video.objects.get(title="VideoTest3")
         self.assertEqual(v.description, "<p>bl</p>")
-        videofile = SimpleUploadedFile(
+        video_file = SimpleUploadedFile(
             "file.mp4", b"file_content", content_type="video/mp4"
         )
         url = reverse("video:video_edit", kwargs={"slug": v.slug})
         response = self.client.post(
             url,
             {
-                "video": videofile,
+                "video": video_file,
                 "title": "VideoTest3",
                 "main_lang": "fr",
                 "cursus": "0",
                 "type": 1,
                 "additional_owners": [self.user.pk],
+                "visibility": "public",
             },
             follow=True,
         )
@@ -945,7 +962,7 @@ class VideoEditTestView(TestCase):
         print("   --->  test_video_edit_post_request of VideoEditTestView: OK!")
 
 
-class video_deleteTestView(TestCase):
+class VideoDeleteTestView(TestCase):
     fixtures = [
         "initial_data.json",
     ]

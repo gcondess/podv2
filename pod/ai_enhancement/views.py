@@ -25,10 +25,9 @@ from pod.completion.models import Track
 from pod.main.lang_settings import ALL_LANG_CHOICES, PREF_LANG_CHOICES
 from pod.main.utils import json_to_web_vtt
 from pod.main.views import in_maintenance
-from pod.podfile.models import UserFolder
 from pod.quiz.utils import import_quiz
 from pod.video.models import Video, Discipline
-from pod.video_encode_transcript.transcript import saveVTT
+from pod.video_encode_transcript.transcript import save_vtt
 
 AI_ENHANCEMENT_CLIENT_ID = getattr(settings, "AI_ENHANCEMENT_CLIENT_ID", "mocked_id")
 AI_ENHANCEMENT_CLIENT_SECRET = getattr(
@@ -333,7 +332,7 @@ def enhance_subtitles(request: WSGIRequest, video_slug: str) -> HttpResponse:
         web_vtt = json_to_web_vtt(
             latest_version["transcript"]["sentences"], video.duration
         )
-        saveVTT(video, web_vtt, latest_version["transcript"]["language"])
+        save_vtt(video, web_vtt, latest_version["transcript"]["language"])
         latest_track = (
             Track.objects.filter(
                 video=video,
@@ -349,10 +348,7 @@ def enhance_subtitles(request: WSGIRequest, video_slug: str) -> HttpResponse:
             + str(True)
         )
 
-    video_folder, created = UserFolder.objects.get_or_create(
-        name=video.slug,
-        owner=request.user,
-    )
+    video_folder = video.get_or_create_video_folder()
     if enhancement_is_already_asked(video):
         enhancement = AIEnhancement.objects.filter(video=video).first()
         if enhancement.is_ready:
